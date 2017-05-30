@@ -132,9 +132,10 @@ public class KMeans {
             int m = elements.size();
             for(int i=0; i < n; ++i){
                 double sum = 0;
-                double[] x = context.row(i).toArray();
+
                 for(int j=0; j < m; ++j){
-                    sum += x[j];
+                    double[] x = context.row(j).toArray();
+                    sum += x[i];
                 }
 
                 newCenter[i] = sum / m;
