@@ -118,27 +118,28 @@ public class KMeans {
         return batch;
     }
 
-    private class Cluster{
+    private class Cluster {
         private final List<DataRow> elements = new ArrayList<>();
 
-        public void append(DataRow tuple){
+        void append(DataRow tuple){
             elements.add(tuple);
         }
 
-        public double[] calcCenter(DataFrame context){
+        double[] calcCenter(DataFrame context){
             if(elements.isEmpty()) return null;
             int n = context.row(0).toArray().length;
             double[] newCenter = new double[n];
             int m = elements.size();
-            for(int i=0; i < n; ++i){
-                double sum = 0;
-
-                for(int j=0; j < m; ++j){
-                    double[] x = context.row(j).toArray();
-                    sum += x[i];
+            for(int j=0; j < m; ++j){
+                double[] x = context.row(j).toArray();
+                for(int i=0; i < n; ++i) {
+                    newCenter[i] += x[i];
                 }
+            }
 
-                newCenter[i] = sum / m;
+            for(int i=0; i < n; ++i){
+
+                newCenter[i] /= m;
             }
             return newCenter;
         }
