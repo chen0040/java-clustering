@@ -506,17 +506,12 @@
         </dependency>
 
         <dependency>
-            <groupId>gov.nist.math</groupId>
-            <artifactId>jama</artifactId>
-            <version>${jama.version}</version>
-        </dependency>
-
-
-        <dependency>
             <groupId>com.github.chen0040</groupId>
-            <artifactId>java-local-search</artifactId>
+            <artifactId>java-data-image</artifactId>
             <version>1.0.1</version>
+            <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 </project>
