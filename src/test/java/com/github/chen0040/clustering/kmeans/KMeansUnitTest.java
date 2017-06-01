@@ -5,6 +5,7 @@ import com.github.chen0040.clustering.utils.FileUtils;
 import com.github.chen0040.data.frame.DataFrame;
 import com.github.chen0040.data.frame.DataRow;
 import com.github.chen0040.data.image.ImageDataFrameFactory;
+import com.github.chen0040.data.image.ImageDataRow;
 import org.testng.annotations.Test;
 
 import javax.imageio.ImageIO;
@@ -40,7 +41,14 @@ public class KMeansUnitTest {
       cluster.setMaxIters(200);
       cluster.setClusterCount(25);
 
-      cluster.fitAndTransform(data);
+      DataFrame learnedData = cluster.fitAndTransform(data);
+      for(int i=0; i <learnedData.rowCount(); ++i) {
+         ImageDataRow row = (ImageDataRow)learnedData.row(i);
+         int x = row.getPixelX();
+         int y = row.getPixelY();
+         String clusterId = row.getCategoricalTargetCell("cluster");
+         System.out.println("cluster id for pixel (" + x + "," + y + ") is " + clusterId);
+      }
 
       List<Integer> classColors = new ArrayList<>();
       for(int i=0; i < 5; ++i){
@@ -56,7 +64,7 @@ public class KMeansUnitTest {
          {
             int rgb = img.getRGB(x, y);
 
-            DataRow tuple = ImageDataFrameFactory.getPixelTuple(data, rgb);
+            DataRow tuple = ImageDataFrameFactory.getPixelTuple(x, y, rgb);
 
             int clusterIndex = cluster.transform(tuple);
 
