@@ -40,32 +40,4 @@ public class DistanceMeasureService {
         return Math.sqrt(cross_prod);
     }
 
-    public static List<TupleTwo<DataRow, Double>> getKNearestNeighbors(DataFrame batch, DataRow t, int k, BiFunction<DataRow, double[], Double> distanceMeasure){
-
-        MinPQ<DataRow> minPQ = new MinPQ<>();
-
-        int N = batch.rowCount();
-        for(int i = 0; i < N; ++i){
-
-            DataRow ti = batch.row(i);
-            if(ti == t) continue;
-            double distance = getDistance(ti, t.toArray(), distanceMeasure);
-            minPQ.enqueue(ti, distance);
-        }
-
-        List<TupleTwo<DataRow, Double>> neighbors = new ArrayList<>();
-        int m = Math.min(k, N);
-        for(int i=0; i < m; ++i){
-            TupleTwo<DataRow, Double> tuple = minPQ.delMin();
-            neighbors.add(tuple);
-        }
-
-        return neighbors;
-    }
-
-    public static TupleTwo<DataRow, Double> getKthNearestNeighbor(DataFrame batch, DataRow tuple, int k, BiFunction<DataRow, double[], Double> distanceMeasure) {
-        List<TupleTwo<DataRow,Double>> neighbors = getKNearestNeighbors(batch, tuple, k, distanceMeasure);
-
-        return neighbors.get(neighbors.size()-1);
-    }
 }
