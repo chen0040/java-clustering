@@ -55,6 +55,11 @@ public class HierarchicalClusteringUnitTest {
       testSimple(HierarchicalClustering.LinkageCriterion.SingleLinkage);
    }
 
+   @Test
+   public void test_min_energy() {
+      testSimple(HierarchicalClustering.LinkageCriterion.MinimumEnergyClustering);
+   }
+
    // unit testing based on example from http://scikit-learn.org/stable/auto_examples/svm/plot_oneclass.html#
    public void testSimple(HierarchicalClustering.LinkageCriterion linkageCriterion){
 
