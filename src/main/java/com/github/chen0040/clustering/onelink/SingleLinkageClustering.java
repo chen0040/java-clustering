@@ -16,7 +16,7 @@ import java.util.function.BiFunction;
  */
 @Getter
 @Setter
-public class SingleLinkageClustering{
+public class SingleLinkageClustering {
     private int clusterCount = 10;
     private BiFunction<DataRow, double[], Double> distanceMeasure;
 
