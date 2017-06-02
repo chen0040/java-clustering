@@ -17,8 +17,51 @@ Add the following dependency to your POM file:
 <dependency>
   <groupId>com.github.chen0040</groupId>
   <artifactId>java-clustering</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
+```
+
+### Spatial Segmentation using DBSCAN
+
+The following sample code shows how to use DBSCAN to perform clustering:
+
+```java
+DataQuery.DataFrameQueryBuilder schema = DataQuery.blank()
+      .newInput("c1")
+      .newInput("c2")
+      .newOutput("designed")
+      .end();
+
+Sampler.DataSampleBuilder negativeSampler = new Sampler()
+      .forColumn("c1").generate((name, index) -> randn() * 0.3 + (index % 2 == 0 ? 2 : 4))
+      .forColumn("c2").generate((name, index) -> randn() * 0.3 + (index % 2 == 0 ? 2 : 4))
+      .forColumn("designed").generate((name, index) -> 0.0)
+      .end();
+
+Sampler.DataSampleBuilder positiveSampler = new Sampler()
+      .forColumn("c1").generate((name, index) -> rand(-4, -2))
+      .forColumn("c2").generate((name, index) -> rand(-2, -4))
+      .forColumn("designed").generate((name, index) -> 1.0)
+      .end();
+
+DataFrame data = schema.build();
+
+data = negativeSampler.sample(data, 200);
+data = positiveSampler.sample(data, 200);
+
+System.out.println(data.head(10));
+
+DBSCAN algorithm = new DBSCAN();
+algorithm.setEpsilon(0.5);
+
+DataFrame learnedData = algorithm.fitAndTransform(data);
+
+for(int i = 0; i < learnedData.rowCount(); ++i){
+ DataRow tuple = learnedData.row(i);
+ String clusterId = tuple.getCategoricalTargetCell("cluster");
+ System.out.println("learned: " + clusterId +"\tknown: "+tuple.target());
+}
+
 ```
 
 ### Image Segmentation (Clustering) using KMeans
