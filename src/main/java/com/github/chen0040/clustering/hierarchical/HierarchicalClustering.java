@@ -20,10 +20,10 @@ import java.util.function.BiFunction;
 @Setter
 public class HierarchicalClustering {
 
-    @Setter(AccessLevel.NONE)
     private int clusterCount = 1;
 
     private LinkageCriterion linkage = LinkageCriterion.AverageLinkage;
+
     private BiFunction<DataRow, DataRow, Double> distanceMeasure;
 
 
