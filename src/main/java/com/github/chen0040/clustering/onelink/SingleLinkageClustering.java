@@ -74,7 +74,7 @@ public class SingleLinkageClustering {
                 mst.add(e);
             }
         }
-        
+
 
         Set<Integer> set = new HashSet<>();
         for(int i=0; i < mst.size(); ++i) {

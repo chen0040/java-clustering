@@ -8,6 +8,7 @@ Package provides java implementation of various clustering algorithms
 * Hierarchical Clustering
 * KMeans Clustering
 * DBSCAN
+* Single Linkage Clustering
  
 # Install
 
@@ -53,6 +54,48 @@ System.out.println(data.head(10));
 
 HierarchicalClustering algorithm = new HierarchicalClustering();
 algorithm.setLinkage(linkageCriterion);
+algorithm.setClusterCount(2);
+
+DataFrame learnedData = algorithm.fitAndTransform(data);
+
+for(int i = 0; i < learnedData.rowCount(); ++i){
+ DataRow tuple = learnedData.row(i);
+ String clusterId = tuple.getCategoricalTargetCell("cluster");
+ System.out.println("learned: " + clusterId +"\tknown: "+tuple.target());
+}
+```
+
+### Spatial Segmentation using Single Linkage Clustering
+
+The following sample code shows how to use single linkage clustering to separate two clusters:
+
+```java
+DataQuery.DataFrameQueryBuilder schema = DataQuery.blank()
+      .newInput("c1")
+      .newInput("c2")
+      .newOutput("designed")
+      .end();
+
+Sampler.DataSampleBuilder negativeSampler = new Sampler()
+      .forColumn("c1").generate((name, index) -> randn() * 0.3 + (index % 2 == 0 ? 2 : 4))
+      .forColumn("c2").generate((name, index) -> randn() * 0.3 + (index % 2 == 0 ? 2 : 4))
+      .forColumn("designed").generate((name, index) -> 0.0)
+      .end();
+
+Sampler.DataSampleBuilder positiveSampler = new Sampler()
+      .forColumn("c1").generate((name, index) -> rand(-4, -2))
+      .forColumn("c2").generate((name, index) -> rand(-2, -4))
+      .forColumn("designed").generate((name, index) -> 1.0)
+      .end();
+
+DataFrame data = schema.build();
+
+data = negativeSampler.sample(data, 50);
+data = positiveSampler.sample(data, 50);
+
+System.out.println(data.head(10));
+
+SingleLinkageClustering algorithm = new SingleLinkageClustering();
 algorithm.setClusterCount(2);
 
 DataFrame learnedData = algorithm.fitAndTransform(data);
