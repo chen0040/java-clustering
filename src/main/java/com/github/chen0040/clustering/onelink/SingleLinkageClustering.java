@@ -1,14 +1,17 @@
 package com.github.chen0040.clustering.onelink;
 
 import com.github.chen0040.clustering.DistanceMeasureService;
+import com.github.chen0040.clustering.Edge;
+import com.github.chen0040.clustering.MinPQ;
+import com.github.chen0040.clustering.QuickUnion;
 import com.github.chen0040.data.frame.DataFrame;
 import com.github.chen0040.data.frame.DataRow;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 
 /**
@@ -45,46 +48,49 @@ public class SingleLinkageClustering {
         Cluster[] clusters = new Cluster[m];
         for(int i = 0; i < m; ++i){
             DataRow tuple = batch.row(i);
-
             clusters[i] = new Cluster(tuple, i);
         }
 
-        int remainingClusterCount = m;
-        for(int i=0; i < (m-clusterCount); ++i){
-            remainingClusterCount--;
-            Cluster[] newClusters = new Cluster[remainingClusterCount];
-
-            int select_j = -1;
-            int select_k = -1;
-            double min_distance = Double.MAX_VALUE;
-            for(int j=0; j < clusters.length; ++j){
-                Cluster cluster_j = clusters[j];
-                for(int k=j+1; k < clusters.length; ++k){
-                    Cluster cluster_k = clusters[k];
-                    double distance = getDistance(cluster_j, cluster_k);
-                    if(distance < min_distance){
-                        select_j = j;
-                        select_k = k;
-                        min_distance = distance;
-                    }
-                }
+        MinPQ<Edge> pq = new MinPQ<>();
+        QuickUnion uf =new QuickUnion(clusters.length);
+        for(int j=0; j < clusters.length; ++j){
+            Cluster cluster_j = clusters[j];
+            for(int k=j+1; k < clusters.length; ++k){
+                Cluster cluster_k = clusters[k];
+                double distance = getDistance(cluster_j, cluster_k);
+                pq.enqueue(new Edge(j, k,distance));
             }
-
-            int newIndex = 0;
-            for(int l=0; l < clusters.length; ++l){
-                if(l != select_j && l != select_k){
-                    newClusters[newIndex++] = clusters[l];
-                }
-            }
-
-            clusters[select_j].add(clusters[select_k]);
-            newClusters[newIndex] = clusters[select_j];
-
-            clusters = newClusters;
         }
 
+        List<Edge> mst = new ArrayList<>();
+        while(!pq.isEmpty() && mst.size() < (m-clusterCount)){
+
+            Edge e = pq.delMin();
+            int select_j = e.either();
+            int select_k = e.other(select_j);
+
+            if(!uf.connected(select_j, select_k)) {
+                uf.union(select_j, select_k);
+                mst.add(e);
+            }
+        }
+        
+
+        Set<Integer> set = new HashSet<>();
+        for(int i=0; i < mst.size(); ++i) {
+            Edge e = mst.get(i);
+            int j = e.either();
+            set.add(uf.id(j));
+        }
+
+        Map<Integer, Integer> clusterIds = new HashMap<>();
+        for(Integer i : set) {
+            clusterIds.put(i, clusterIds.size());
+        }
+
+
         for(int i=0; i < clusters.length; ++i){
-            clusters[i].setIndex(i);
+            clusters[i].setIndex(clusterIds.get(uf.id(i)));
         }
 
         return batch;
@@ -121,6 +127,8 @@ public class SingleLinkageClustering {
         }
 
         public void add(Cluster cluster){
+            if(index == cluster.index) return;
+
             for(DataRow tuple : cluster.getPoints()){
                 add(tuple);
             }
